@@ -116,6 +116,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
     public void start(){
+        start.setEnabled(false);
+        call.setEnabled(true);
         //Initialize PeerConnectionFactory globals.
         //Params are context, initAudio,initVideo and videoCodecHwAcceleration
         //PeerConnectionFactory.initializeAndroidGlobals(this, true, true, true);
@@ -124,7 +126,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         //Create a new PeerConnectionFactory instance.
         //PeerConnectionFactory.Options options = new PeerConnectionFactory.Options();
-        PeerConnectionFactory peerConnectionFactory = PeerConnectionFactory.builder().createPeerConnectionFactory();
+         peerConnectionFactory = PeerConnectionFactory.builder().createPeerConnectionFactory();
 
 
         //Now create a VideoCapturer instance. Callback methods are there if you want to do something! Duh!
@@ -133,26 +135,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         MediaConstraints constraints = new MediaConstraints();
 
         //Create a VideoSource instance
-        VideoSource videoSource = peerConnectionFactory.createVideoSource(videoCapturerAndroid);
-        VideoTrack localVideoTrack = peerConnectionFactory.createVideoTrack("100", videoSource);
+         videoSource = peerConnectionFactory.createVideoSource(videoCapturerAndroid);
+         localVideoTrack = peerConnectionFactory.createVideoTrack("100", videoSource);
 
         //create an AudioSource instance
-        AudioSource audioSource = peerConnectionFactory.createAudioSource(constraints);
-        AudioTrack localAudioTrack = peerConnectionFactory.createAudioTrack("101", audioSource);
+         audioSource = peerConnectionFactory.createAudioSource(constraints);
+         localAudioTrack = peerConnectionFactory.createAudioTrack("101", audioSource);
 
         //we will start capturing the video from the camera
         //width,height and fps
         videoCapturerAndroid.startCapture(1000, 1000, 30);
 
         //create surface renderer, init it and add the renderer to the track
-        SurfaceViewRenderer videoView = (SurfaceViewRenderer) findViewById(R.id.local_gl_surface_view);
-        videoView.setMirror(true);
+        //SurfaceViewRenderer videoView = (SurfaceViewRenderer) findViewById(R.id.local_gl_surface_view);
+        //localVideoView.setMirror(true);
 
         EglBase rootEglBase = EglBase.create();
-        videoView.init(rootEglBase.getEglBaseContext(), null);
-
-        localVideoTrack.addRenderer(new VideoRenderer(videoView));
-
+        localVideoView.init(rootEglBase.getEglBaseContext(), null);
+        localVideoTrack.addRenderer(new VideoRenderer(localVideoView));
 
     }
 
@@ -164,9 +164,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      * Initialize this video view
      */
     private void initVideos(){
-        EglBase rootEglBase = EglBase.create();
-        localVideoView.init(rootEglBase.getEglBaseContext() , null);
-        remoteVideoView.init(rootEglBase.getEglBaseContext() , null);
+        //EglBase rootEglBase = EglBase.create();
+        //localVideoView.init(rootEglBase.getEglBaseContext() , null);
+        //remoteVideoView.init(rootEglBase.getEglBaseContext() , null);
         localVideoView.setZOrderMediaOverlay(true);
         remoteVideoView.setZOrderMediaOverlay(true);
     }
@@ -197,7 +197,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         VideoCapturer videoCapturer = null;
         Log.d(TAG, "Creating capturer using camera1 API.");
         videoCapturer = createCameraCapturer(new Camera1Enumerator(false));
-        videoCapturer.startCapture(0 , 90 , 270);
+        //videoCapturer.startCapture(0 , 90 , 270);
         return videoCapturer;
     }
 
@@ -255,8 +255,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         sdpConstraints.mandatory.add(new MediaConstraints.KeyValuePair("offerToReceiveAudio", "true"));
         sdpConstraints.mandatory.add(new MediaConstraints.KeyValuePair("offerToReceiveVideo", "true"));
 
-
-
         // create localPeer
         //creating localPeer
         localPeer = peerConnectionFactory.createPeerConnection(iceServers, sdpConstraints, new CustomPeerConnectionObserver("localPeerCreation") {
@@ -266,8 +264,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 onIceCandidateReceived(localPeer, iceCandidate);
             }
         });
-
-
 
         // create remotePeer
         //creating remotePeer
@@ -343,6 +339,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     remoteRenderer = new VideoRenderer(remoteVideoView);
                     remoteVideoView.setVisibility(View.VISIBLE);
                     videoTrack.addRenderer(remoteRenderer);
+
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
